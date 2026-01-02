@@ -3,10 +3,20 @@ import OpenAI from 'openai';
 import type { WizardFormData, ActionItem } from '@/types';
 import { LIMITS, generateId } from '@/types';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization of OpenAI client (avoids build-time errors)
+let openaiClient: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI | null {
+    if (!process.env.OPENAI_API_KEY) {
+        return null;
+    }
+    if (!openaiClient) {
+        openaiClient = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+    }
+    return openaiClient;
+}
 
 // System prompts for AI generation
 const SYSTEM_PROMPTS = {
@@ -183,6 +193,14 @@ ${mockActionItems.map(a => `| ${a.action} | ${a.owner} | ${a.priority} |`).join(
         }
 
         // Generate with OpenAI
+        const openai = getOpenAIClient();
+        if (!openai) {
+            return NextResponse.json(
+                { success: false, error: 'OpenAI API key not configured' },
+                { status: 500 }
+            );
+        }
+
         try {
             // 1. Generate action items
             const actionItemsResponse = await openai.chat.completions.create({
