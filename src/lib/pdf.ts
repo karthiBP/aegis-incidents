@@ -4,9 +4,31 @@ import type { Incident } from '@/types';
 export async function generateIncidentPDF(incident: Incident): Promise<void> {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     const contentWidth = pageWidth - (margin * 2);
     let y = margin;
+
+    // Add watermark to current page
+    const addWatermark = () => {
+        doc.saveGraphicsState();
+        doc.setGState(new (doc as unknown as { GState: new (options: { opacity: number }) => object }).GState({ opacity: 0.08 }));
+        doc.setFontSize(50);
+        doc.setTextColor(59, 130, 246);
+        doc.setFont('helvetica', 'bold');
+
+        // Rotate and center the watermark
+        const text = 'AEGIS INCIDENTS';
+        const textWidth = doc.getTextWidth(text);
+        const centerX = pageWidth / 2;
+        const centerY = pageHeight / 2;
+
+        doc.text(text, centerX - textWidth / 2, centerY, { angle: 45 });
+        doc.restoreGraphicsState();
+    };
+
+    // Add watermark to first page
+    addWatermark();
 
     // Helper function to add text with word wrap
     const addText = (text: string, fontSize: number, isBold: boolean = false, color: number[] = [0, 0, 0]) => {
@@ -20,6 +42,7 @@ export async function generateIncidentPDF(incident: Incident): Promise<void> {
         const lineHeight = fontSize * 0.5;
         if (y + (lines.length * lineHeight) > doc.internal.pageSize.getHeight() - margin) {
             doc.addPage();
+            addWatermark();
             y = margin;
         }
 
@@ -113,6 +136,7 @@ export async function generateIncidentPDF(incident: Incident): Promise<void> {
             // Check page break
             if (y > doc.internal.pageSize.getHeight() - margin) {
                 doc.addPage();
+                addWatermark();
                 y = margin;
             }
         });
@@ -149,6 +173,7 @@ export async function generateIncidentPDF(incident: Incident): Promise<void> {
             // Check page break
             if (y > doc.internal.pageSize.getHeight() - margin) {
                 doc.addPage();
+                addWatermark();
                 y = margin;
             }
         });

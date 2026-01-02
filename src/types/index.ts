@@ -56,6 +56,7 @@ export interface Incident {
 export interface WizardStep1Data {
     title: string;
     incident_type: IncidentType;
+    custom_type?: string; // For 'OTHER' incident type
     severity: Severity;
     start_time: string;
     end_time: string;

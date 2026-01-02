@@ -536,7 +536,13 @@ export default function IncidentDetailPage() {
                                             </Button>
                                         </div>
                                     </div>
-                                    <div className="bg-gray-50 rounded-xl p-6 font-mono text-sm whitespace-pre-wrap overflow-x-auto">
+                                    <div className="relative bg-gray-50 rounded-xl p-6 font-mono text-sm whitespace-pre-wrap overflow-x-auto">
+                                        {/* Watermark */}
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+                                            <span className="text-4xl font-bold text-blue-500/10 whitespace-nowrap transform rotate-[-30deg] select-none">
+                                                AEGIS INCIDENTS
+                                            </span>
+                                        </div>
                                         {incident.report_markdown || 'No report generated yet.'}
                                     </div>
                                 </CardContent>
